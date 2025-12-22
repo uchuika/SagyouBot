@@ -2,11 +2,11 @@ const {
     SlashCommandBuilder,
     MessageFlags,
     ContainerBuilder,
-    SectionBuilder,
     ButtonBuilder,
     TextDisplayBuilder,
     ActionRowBuilder,
-    ButtonStyle
+    ButtonStyle,
+    discord
 } = require('discord.js');
 
 let components = new ContainerBuilder()
@@ -20,7 +20,8 @@ let components = new ContainerBuilder()
             new ButtonBuilder()
                 .setCustomId('button2')
                 .setLabel('緑！')
-                .setStyle(ButtonStyle.Success),
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(true),
             new ButtonBuilder()
                 .setCustomId('button3')
                 .setLabel('赤！')
@@ -37,5 +38,6 @@ module.exports = {
             components: [components],
             flags: [MessageFlags.IsComponentsV2, MessageFlags.Ephemeral]
         });
+        console.log('createVCコマンドが実行');
     },
 };

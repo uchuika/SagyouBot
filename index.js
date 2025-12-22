@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { MessageFlags, Client, Collection, Events, GatewayIntentBits, ChannelType } = require('discord.js');
 const { token } = require('./config.json');
 
 const client = new Client({ intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b) });
@@ -28,6 +28,8 @@ for (const folder of commandFolders) {
 	}
 }
 
+
+//コマンドに関する処理
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
@@ -47,6 +49,32 @@ client.on(Events.InteractionCreate, async interaction => {
 		} else {
 			await interaction.reply({ content: 'このコマンドの実行中にエラーが発生しました！', flags: MessageFlags.Ephemeral });
 		}
+	}
+});
+
+//ボタンについての処理
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isButton()) return;
+	if (interaction.customId == 'button2') {
+		await interaction.reply({
+			content: 'VCを作成します',
+			flags: MessageFlags.Ephemeral
+		});
+		console.log(`VCを作成します ${interaction.user.displayName}(${interaction.user}) `);
+
+		await interaction.guild.channels.create({
+			name: '作業test',
+			type: ChannelType.GuildVoice,
+			parent: '1451214635700064359'
+		});
+	}
+
+	if (interaction.customId == 'button3') {
+		await interaction.reply({
+			content: 'ボタン3が押されました',
+			flags: MessageFlags.Ephemeral
+		});
+		console.log(`ボタン3が押されました ${interaction.user.displayName}(${interaction.user}) `);
 	}
 });
 
