@@ -62,6 +62,7 @@ client.on(Events.InteractionCreate, async interaction => {
 		});
 		console.log(`VCを作成します ${interaction.user.displayName}(${interaction.user}) `);
 
+		//VCを作成
 		await interaction.guild.channels.create({
 			name: '作業test',
 			type: ChannelType.GuildVoice,
