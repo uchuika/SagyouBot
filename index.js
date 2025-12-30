@@ -9,10 +9,14 @@ client.commands = new Collection();
 
 client.on('ready', () => {
 	console.log(`${client.user.tag}でログインしました。`);
+
 });
 
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
+
+//const members = client.guild
+
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
