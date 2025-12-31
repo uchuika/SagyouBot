@@ -2,6 +2,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { MessageFlags, Client, Collection, Events, GatewayIntentBits, ChannelType } = require('discord.js');
 const { token } = require('./config.json');
+const buttonHandler = require('./button.js');
+const button = require('./button.js');
+
+const { activePrivateVCs } = buttonHandler;
+
+const VC_DELETE_COOLDOWN = 60 * 1000; // 60秒
 
 const client = new Client({ intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b) });
 
@@ -14,9 +20,6 @@ client.on('ready', () => {
 
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
-
-//const members = client.guild
-
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
@@ -59,6 +62,9 @@ client.on(Events.InteractionCreate, async interaction => {
 //ボタンについての処理
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isButton()) return;
+
+	await buttonHandler.execute(interaction);
+
 	if (interaction.customId == 'button2') {
 		await interaction.reply({
 			content: 'VCを作成します',
@@ -83,4 +89,41 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 });
 
+//VC自動削除用
+client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+	// VC 退出時のみチェック
+	if (oldState.channelId && oldState.channelId !== newState.channelId) {
+		const channelId = oldState.channelId;
+
+		if (!activePrivateVCs.has(channelId)) return;
+
+		const channel = oldState.guild.channels.cache.get(channelId);
+		if (!channel) {
+			activePrivateVCs.delete(channelId);
+			return;
+		}
+
+		// まだ人がいる
+		if (channel.members.size > 0) return;
+
+		/*
+		const createdAt = activePrivateVCs.get(channelId);
+		const elapsed = Date.now() - createdAt;
+
+		// クールダウン未経過
+		if (elapsed < VC_DELETE_COOLDOWN) return;
+		*/
+
+		try {
+			await channel.delete('Private VC auto cleanup');
+		} catch { }
+
+		activePrivateVCs.delete(channelId);
+	}
+});
+
 client.login(token);
+
+module.exports = {
+	client,
+};
